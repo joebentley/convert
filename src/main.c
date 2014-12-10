@@ -6,11 +6,12 @@
 
 
 int main(int argc, char *argv[]) {
-  value_t *input = calloc(1, sizeof(value_t));
+  value_t *input = new_value();
   unit_t output = NONE;
 
   for (int i = 1; i < argc; i++) {
-    if (!strcmp(argv[i], "-i")) {
+    // Don't even try unless we know there are more than 1 arguments
+    if (argc > 2 && !strcmp(argv[i], "-i")) {
       unit_t input_unit = str_to_unit(argv[i + 1]);
       if (input_unit == NONE) {
         fprintf(stderr, "Input unit not recognized\n");
@@ -21,14 +22,14 @@ int main(int argc, char *argv[]) {
       // Check if the user gave value argument, if not use stdin 
       if (argc > 5) {
         sscanf(argv[argc - 1], "%lf", &input->value);
-      } else {
+      } else if (argc > 4) { // Check that at least input, output given
         char number[100];
         fgets(number, 100, stdin);
         sscanf(number, "%lf", &input->value);
       }
     }
 
-    if (!strcmp(argv[i], "-f")) {
+    if (argc > 2 && !strcmp(argv[i], "-f")) {
       output = str_to_unit(argv[i + 1]);
       if (output == NONE) {
         fprintf(stderr, "Output unit not recognized\n");

@@ -14,6 +14,10 @@ install-sh
 missing
 stamp-h1
 
+Build
+
 src/.deps
 src/Makefile
 src/Makefile.in
+
+*.o
