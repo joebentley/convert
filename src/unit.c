@@ -2,10 +2,10 @@
 #include <string.h>
 #include "unit.h"
 
-int conversion_factor(unit_t input, unit_t output, double *factor);
+int conversion_factor(unit_t input, unit_t output, long double *factor);
 
 int convert(value_t *value, unit_t output) {
-  double factor;
+  long double factor;
   if (conversion_factor(value->unit, output, &factor) == EXIT_FAILURE) {
     return EXIT_FAILURE;
   }
@@ -14,7 +14,7 @@ int convert(value_t *value, unit_t output) {
   return EXIT_SUCCESS;
 }
 
-int conversion_factor(unit_t input, unit_t output, double *factor) {
+int conversion_factor(unit_t input, unit_t output, long double *factor) {
   if (input == METRES) {
     switch (output) {
       case METRES:

@@ -22,7 +22,7 @@ const char *unit_to_str(unit_t unit);
 
 
 typedef struct {
-  double value;
+  long double value;
   unit_t unit;
 } value_t;
 

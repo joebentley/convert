@@ -30,11 +30,11 @@ int main(int argc, char *argv[]) {
       input->unit = input_unit;
       // Check if the user gave value argument, if not use stdin 
       if (argc > 5) {
-        sscanf(argv[argc - 1], "%lf", &input->value);
+        sscanf(argv[argc - 1], "%Lf", &input->value);
       } else if (argc > 4) { // Check that at least input, output given
         char number[100];
         fgets(number, 100, stdin);
-        sscanf(number, "%lf", &input->value);
+        sscanf(number, "%Lf", &input->value);
       }
     }
 
@@ -76,13 +76,13 @@ int main(int argc, char *argv[]) {
 
   switch (format) {
     case CONTEXT_EXPONENTIAL:
-      printf("%g\n", input->value);
+      printf("%Lg\n", input->value);
       break;
     case FORCED_EXPONENTIAL:
-      printf("%e\n", input->value);
+      printf("%Le\n", input->value);
       break;
     case DECIMAL:
-      printf("%f\n", input->value);
+      printf("%Lf\n", input->value);
       break;
   }
 
