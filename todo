@@ -1,0 +1,2 @@
+
+- Infer input unit from input string if "-i" not specified

@@ -1,4 +1,3 @@
-
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -28,14 +27,6 @@ int main(int argc, char *argv[]) {
       }
      
       input->unit = input_unit;
-      // Check if the user gave value argument, if not use stdin 
-      if (argc > 5) {
-        sscanf(argv[argc - 1], "%Lf", &input->value);
-      } else if (argc > 4) { // Check that at least input, output given
-        char number[100];
-        fgets(number, 100, stdin);
-        sscanf(number, "%Lf", &input->value);
-      }
     }
 
     // Output unit
@@ -58,6 +49,31 @@ int main(int argc, char *argv[]) {
       format = DECIMAL;
     }
   }
+
+
+  // Check if the user gave value argument, if not use stdin 
+  char *raw_number = argv[argc - 1];
+  // TODO: Fix stdin
+
+  // Split string by spaces, the first string will be the
+  // number, the second will be the unit
+  char *value = strtok(raw_number, " ");
+  char *unit = strtok(NULL, " ");
+
+  if (value) {
+    sscanf(value, "%Lf", &input->value);
+  } else {
+    fprintf(stderr, "No value given\n");
+    return -1;
+  }
+
+  if (unit) {
+    input->unit = str_to_unit(unit);
+  } else if (input->unit == NONE) {
+    fprintf(stderr, "No unit given\n");
+    return -1;
+  }
+
 
   if (input->unit == NONE) {
     fprintf(stderr, "No input unit given\n");
