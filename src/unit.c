@@ -104,16 +104,16 @@ value_t *new_value() {
 
 
 unit_t str_to_unit(char* to_convert) {
-  if (!strcmp(to_convert, "metres")) {
+  if (!strcmp(to_convert, "metres") || !strcmp(to_convert, "m")) {
     return METRES;
   }
-  if (!strcmp(to_convert, "miles")) {
+  if (!strcmp(to_convert, "miles") || !strcmp(to_convert, "mil")) {
     return MILES;
   }
-  if (!strcmp(to_convert, "feet")) {
+  if (!strcmp(to_convert, "feet") || !strcmp(to_convert, "ft")) {
     return FEET;
   }
-  if (!strcmp(to_convert, "inches")) {
+  if (!strcmp(to_convert, "inches") || !strcmp(to_convert, "in")) {
     return INCHES;
   }
 
