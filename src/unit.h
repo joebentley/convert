@@ -10,15 +10,16 @@
 
 
 typedef enum {
+  METRES,
   INCHES,
   FEET,
   MILES,
-  METRES,
   NONE
 } unit_t;
 
 unit_t str_to_unit(char *to_convert);
 const char *unit_to_str(unit_t unit);
+const char *unit_to_short_str(unit_t unit);
 
 
 typedef struct {

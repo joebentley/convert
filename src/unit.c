@@ -4,6 +4,10 @@
 
 int conversion_factor(unit_t input, unit_t output, long double *factor);
 
+const char *unit_strs[] = { "metres", "inches", "feet", "miles", "none" };
+const char *unit_short_strs[] = { "m", "in", "ft", "mil", "none" };
+
+
 int convert(value_t *value, unit_t output) {
   long double factor;
   if (conversion_factor(value->unit, output, &factor) == EXIT_FAILURE) {
@@ -104,24 +108,23 @@ value_t *new_value() {
 
 
 unit_t str_to_unit(char* to_convert) {
-  if (!strcmp(to_convert, "metres") || !strcmp(to_convert, "m")) {
-    return METRES;
-  }
-  if (!strcmp(to_convert, "miles") || !strcmp(to_convert, "mil")) {
-    return MILES;
-  }
-  if (!strcmp(to_convert, "feet") || !strcmp(to_convert, "ft")) {
-    return FEET;
-  }
-  if (!strcmp(to_convert, "inches") || !strcmp(to_convert, "in")) {
-    return INCHES;
+  // Loop through each value in the enum and check if to_convert is one,
+  // a pretty cool idea!
+
+  for (int i = METRES; i <= NONE; i++) {
+    if (!strcmp(to_convert, unit_to_str((unit_t) i)) ||
+        !strcmp(to_convert, unit_to_short_str((unit_t) i))) {
+
+      return (unit_t) i;
+    }
   }
 
   return NONE;
 }
 
-const char *unit_strs[] = { "inches", "feet", "miles", "metres", "none" };
-
 const char *unit_to_str(unit_t unit) {
   return unit_strs[unit];
+}
+const char *unit_to_short_str(unit_t unit) {
+  return unit_short_strs[unit];
 }

@@ -12,6 +12,9 @@ int main(int argc, char *argv[]) {
   // Print in context-sensitive exponential format by default
   format_t format = CONTEXT_EXPONENTIAL;
 
+  // Whether to print the unit in output
+  int show_unit = 1;
+
   // Count how many arguments have been parsed so far so we
   // can work out if we've consumed them all.
   int args_parsed = 0;
@@ -47,16 +50,22 @@ int main(int argc, char *argv[]) {
 
     // Output format flags
     if (!strcmp(argv[i], "-fc")) {
-      args_parsed++;
       format = CONTEXT_EXPONENTIAL;
+      args_parsed++;
     }
     if (!strcmp(argv[i], "-fe")) {
-      args_parsed++;
       format = FORCED_EXPONENTIAL;
+      args_parsed++;
     }
     if (!strcmp(argv[i], "-fd")) {
-      args_parsed++;
       format = DECIMAL;
+      args_parsed++;
+    }
+
+    // Don't display unit in output
+    if (!strcmp(argv[i], "-u")) {
+      show_unit = 0;
+      args_parsed++;
     }
   }
 
@@ -115,16 +124,24 @@ int main(int argc, char *argv[]) {
     return -1;
   }
 
+  char buffer[100];
+
   switch (format) {
     case CONTEXT_EXPONENTIAL:
-      printf("%Lg\n", input->value);
+      snprintf(buffer, 100, "%Lg", input->value);
       break;
     case FORCED_EXPONENTIAL:
-      printf("%Le\n", input->value);
+      snprintf(buffer, 100, "%Le", input->value);
       break;
     case DECIMAL:
-      printf("%Lf\n", input->value);
+      snprintf(buffer, 100, "%Lf", input->value);
       break;
+  }
+
+  if (show_unit) {
+    printf("%s %s\n", buffer, unit_to_short_str(output));
+  } else {
+    printf("%s\n", buffer);
   }
 
   return 0;
