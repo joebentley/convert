@@ -1,2 +1,2 @@
 
-- Infer input unit from input string if "-i" not specified
+- Allow output of unit with output string
