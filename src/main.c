@@ -1,3 +1,4 @@
+#include <ctype.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -15,6 +16,9 @@ int main(int argc, char *argv[]) {
   // Whether to print the unit in output
   int show_unit = 1;
 
+  // Whether to put/allow space between unit and value
+  int allow_space = 0;
+
   // Count how many arguments have been parsed so far so we
   // can work out if we've consumed them all.
   int args_parsed = 0;
@@ -24,8 +28,8 @@ int main(int argc, char *argv[]) {
     if (argc < 2) {
       break;
     }
-   
-    // Input unit 
+
+    // Input unit
     if (!strcmp(argv[i], "-i")) {
       args_parsed += 2;
 
@@ -67,22 +71,61 @@ int main(int argc, char *argv[]) {
       show_unit = 0;
       args_parsed++;
     }
+
+    // Allow space between value and unit
+    if (!strcmp(argv[i], "-s")) {
+      allow_space = 1;
+      args_parsed++;
+    }
   }
 
-  char *raw_number = malloc(1000 * sizeof(char));
+  char raw_number[1000];
 
   // If we have consumed all the arguments, use stdin as
   // there is no value argument
   if (args_parsed == argc - 1) {
     fgets(raw_number, 1000, stdin);
   } else {
-    raw_number = argv[argc - 1];
+    strcpy(raw_number, argv[argc - 1]);
   }
 
-  // Split string by spaces, the first string will be the
-  // number, the second will be the unit
-  char *value = strtok(raw_number, " ");
-  char *unit = strtok(NULL, " ");
+
+  char *value;
+  char *unit;
+  if (allow_space) {
+    // Split string by spaces, the first string will be the
+    // number, the second will be the unit
+    value = strtok(raw_number, " ");
+
+    char *u = strtok(NULL, " ");
+    // Check that the unit isn't null (that a unit is given)
+    if (u) {
+      unit = u;
+    } else {
+      fprintf(stderr, "No unit given in input string (no space found)\n");
+      return -1;
+    }
+  } else {
+    value = malloc(1000 * sizeof(char));
+    unit  = malloc(1000 * sizeof(char));
+    // Walk backwards through string until number found,
+    // all the characters we walk through are our units
+    for (int i = strlen(raw_number); i > 0; i--) {
+      // Spaces aren't allowed
+      if (isspace(raw_number[i])) {
+        fprintf(stderr, "Spaces in input requires -s flag\n");
+        return -1;
+      }
+
+      if (isdigit(raw_number[i])) {
+        // Fill value with all chars before and including raw_number[i]
+        strncpy(value, raw_number, i + 1);
+        // Fill unit with all chars after raw_number[i]
+        strncpy(unit, raw_number + i + 1, strlen(raw_number) - i - 1);
+        break;
+      }
+    }
+  }
 
   if (value) {
     sscanf(value, "%Lf", &input->value);
@@ -139,7 +182,11 @@ int main(int argc, char *argv[]) {
   }
 
   if (show_unit) {
-    printf("%s %s\n", buffer, unit_to_short_str(output));
+    if (allow_space) {
+      printf("%s %s\n", buffer, unit_to_short_str(output));
+    } else {
+      printf("%s%s\n", buffer, unit_to_short_str(output));
+    }
   } else {
     printf("%s\n", buffer);
   }
