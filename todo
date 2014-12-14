@@ -1,2 +1,3 @@
 
-- Allow input without space
+- Switch to getopt
+- Add usage text

@@ -1,3 +1,4 @@
+#include <unistd.h>
 #include <ctype.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -19,63 +20,72 @@ int main(int argc, char *argv[]) {
   // Whether to put/allow space between unit and value
   int allow_space = 0;
 
-  // Count how many arguments have been parsed so far so we
-  // can work out if we've consumed them all.
-  int args_parsed = 0;
+  char c;
+  while ((c = getopt(argc, argv, "i:o:f:us")) != -1) {
+    switch (c) {
+      // Input unit
+      case 'i':
+        {
+          unit_t input_unit = str_to_unit(optarg);
+          if (input_unit == NONE) {
+            fprintf(stderr, "Input unit not recognized\n");
+            return -1;
+          }
+          input->unit = input_unit;
+          break;
+        }
 
-  for (int i = 1; i < argc; i++) {
-    // Only parse if there is more than 1 argument
-    if (argc < 2) {
-      break;
-    }
+      // Output unit
+      case 'o':
+        {
+          output = str_to_unit(optarg);
+          if (output == NONE) {
+            fprintf(stderr, "Output unit not recognized\n");
+            return -1;
+          }
+          break;
+        }
 
-    // Input unit
-    if (!strcmp(argv[i], "-i")) {
-      args_parsed += 2;
+      // Output format flags
+      case 'f':
+        {
+          switch(optarg[0]) {
+            case 'c':
+              format = CONTEXT_EXPONENTIAL;
+              break;
+            case 'e':
+              format = FORCED_EXPONENTIAL;
+              break;
+            case 'd':
+              format = DECIMAL;
+              break;
+          }
+          break;
+        }
 
-      unit_t input_unit = str_to_unit(argv[i + 1]);
-      if (input_unit == NONE) {
-        fprintf(stderr, "Input unit not recognized\n");
-        return -1;
-      }
+      // Don't display unit in output
+      case 'u':
+        show_unit = 0;
+        break;
 
-      input->unit = input_unit;
-    }
+      // Allow space between value and unit
+      case 's':
+        allow_space = 1;
+        break;
 
-    // Output unit
-    if (!strcmp(argv[i], "-o")) {
-      args_parsed += 2;
-      output = str_to_unit(argv[i + 1]);
-      if (output == NONE) {
-        fprintf(stderr, "Output unit not recognized\n");
-        return -1;
-      }
-    }
-
-    // Output format flags
-    if (!strcmp(argv[i], "-fc")) {
-      format = CONTEXT_EXPONENTIAL;
-      args_parsed++;
-    }
-    if (!strcmp(argv[i], "-fe")) {
-      format = FORCED_EXPONENTIAL;
-      args_parsed++;
-    }
-    if (!strcmp(argv[i], "-fd")) {
-      format = DECIMAL;
-      args_parsed++;
-    }
-
-    // Don't display unit in output
-    if (!strcmp(argv[i], "-u")) {
-      show_unit = 0;
-      args_parsed++;
-    }
-
-    // Allow space between value and unit
-    if (!strcmp(argv[i], "-s")) {
-      allow_space = 1;
-      args_parsed++;
+      // Print usage string
+      default:
+        {
+          fprintf(stderr, "\nUsage: convert [<options>] [value]\n\n");
+          fprintf(stderr, "Options:\n");
+          fprintf(stderr, "-i [unit]  set input unit to [unit]\n");
+          fprintf(stderr, "-o [unit]  set output unit to [unit]\n");
+          fprintf(stderr, "-f [style] select output style\n");
+          fprintf(stderr, "-s         allow spaces in input and output\n");
+          fprintf(stderr, "-u         don't display unit in output\n");
+          fprintf(stderr, "--help     show this message\n\n");
+          return -1;
+        }
     }
   }
 
@@ -83,12 +93,17 @@ int main(int argc, char *argv[]) {
 
   // If we have consumed all the arguments, use stdin as
   // there is no value argument
-  if (args_parsed == argc - 1) {
+  if (optind == argc) {
     fgets(raw_number, 1000, stdin);
   } else {
-    strcpy(raw_number, argv[argc - 1]);
+    strcpy(raw_number, argv[optind]);
   }
 
+  // Strip trailing newline from input
+  size_t len = strlen(raw_number) - 1;
+  if (raw_number[len] == '\n') {
+    raw_number[len] = '\0';
+  }
 
   char *value;
   char *unit;
@@ -108,6 +123,7 @@ int main(int argc, char *argv[]) {
   } else {
     value = malloc(1000 * sizeof(char));
     unit  = malloc(1000 * sizeof(char));
+
     // Walk backwards through string until number found,
     // all the characters we walk through are our units
     for (int i = strlen(raw_number); i > 0; i--) {
@@ -127,20 +143,14 @@ int main(int argc, char *argv[]) {
     }
   }
 
-  if (value) {
+  if (strlen(value) > 0) {
     sscanf(value, "%Lf", &input->value);
   } else {
     fprintf(stderr, "No value given\n");
     return -1;
   }
 
-  // Strip trailing newline from unit
-  size_t len = strlen(unit) - 1;
-  if (unit[len] == '\n') {
-    unit[len] = '\0';
-  }
-
-  if (unit) {
+  if (strlen(unit) > 0) {
     // If result is NONE, unit not recognized
     if ((input->unit = str_to_unit(unit)) == NONE) {
       fprintf(stderr, "Unit not recognized\n");
