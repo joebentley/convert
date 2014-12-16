@@ -126,7 +126,7 @@ int main(int argc, char *argv[]) {
 
     // Walk backwards through string until number found,
     // all the characters we walk through are our units
-    for (int i = strlen(raw_number); i > 0; i--) {
+    for (int i = strlen(raw_number); i >= 0; i--) {
       // Spaces aren't allowed
       if (isspace(raw_number[i])) {
         fprintf(stderr, "Spaces in input requires -s flag\n");
